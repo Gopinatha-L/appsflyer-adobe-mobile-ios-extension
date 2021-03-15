@@ -54,6 +54,18 @@ Code Sample to handle deeplinking data:
 
 ###  <a id="ios-deeplink"> iOS Deeplink Setup
     
+For iOS deeplinking, add the following code to the scene, or equivalent app delegate methods:
+```swift
+ func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+    AppsFlyerLib.shared().continue(userActivity, restorationHandler: nil)
+}
+
+func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    if let url = URLContexts.first?.url {
+        AppsFlyerLib.shared().handleOpen(url, options: nil)
+    }
+}
+```
     
     
 #### <a id="uri-scheme"> URI Scheme
