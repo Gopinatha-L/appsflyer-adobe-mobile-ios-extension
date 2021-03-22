@@ -7,10 +7,14 @@
 //
 
 #import "AppsFlyerAdobeExtension.h"
+#import <objc/message.h>
+
 
 static AppsFlyerAdobeExtension *__sharedInstance = nil;
 static void (^__completionHandler)(NSDictionary*) = nil;
 static void (^__errorHandler)(NSError*) = nil;
+
+typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
 
 @implementation AppsFlyerAdobeExtension
 
@@ -108,6 +112,13 @@ static void (^__errorHandler)(NSError*) = nil;
                     NSLog(@"com.appsflyer.adobeextension ExperienceCloudId is null");
                 }
             }];
+            
+            SEL SKSel = NSSelectorFromString(@"__willResolveSKRules:");
+           id AppsFlyer = [AppsFlyerLib shared];
+           if ([AppsFlyer respondsToSelector:SKSel]) {
+               bypassDidFinishLaunchingWithOption msgSend = (bypassDidFinishLaunchingWithOption)objc_msgSend;
+               msgSend(AppsFlyer, SKSel, 2);
+           }
        
             if (appId && ![appId isEqualToString: @""]){
                 [AppsFlyerLib shared].appleAppID = appId;
