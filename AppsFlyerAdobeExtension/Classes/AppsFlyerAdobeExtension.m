@@ -7,6 +7,7 @@
 //
 
 #import "AppsFlyerAdobeExtension.h"
+#import "AppsFlyerAttribution.h"
 #import <objc/message.h>
 
 
@@ -136,6 +137,8 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
             
             if (![self didInit]) {
                 [[AppsFlyerLib shared] start];
+                [AppsFlyerAttribution shared].isBridgeReady = YES;
+                [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
                 [self setDidInit:YES];
             }
         } else {
@@ -146,6 +149,7 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
 
 - (void) appDidBecomeActive {
     if ([self didReceiveConfigurations]) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
         [[AppsFlyerLib shared] start];
         [self setDidInit:YES];
     }
@@ -153,11 +157,11 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
 
 + (void)continueUserActivity:(NSUserActivity *)userActivity
             restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> *restorableObjects))restorationHandler {
-    [[AppsFlyerLib shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
+    [[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
 }
 
 + (void)openURL:(NSURL *)url options:(NSDictionary *)options {
-    [[AppsFlyerLib shared] handleOpenUrl:url options:options];
+    [[AppsFlyerAttribution shared] handleOpenUrl:url options:options];
 }
 
 - (void) onAppOpenAttribution:(NSDictionary *)attributionData {
