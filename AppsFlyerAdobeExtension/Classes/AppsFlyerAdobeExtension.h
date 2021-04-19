@@ -20,6 +20,7 @@
 #define IS_FIRST_LAUNCH  @"is_first_launch"
 #define CALLBACK_TYPE    @"callback_type"
 
+static BOOL absd;
 NS_ASSUME_NONNULL_BEGIN
 @interface AppsFlyerAdobeExtension : ACPExtension <AppsFlyerLibDelegate> {}
 
@@ -29,9 +30,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (atomic) NSString* eventSettings;
 @property (atomic) NSString* ecid;
 @property (atomic) NSDictionary* gcd;
+@property(atomic) BOOL waitForECID;
+@property (atomic) BOOL mayStartSDK;
 
 + (nullable instancetype)shared;
 + (void)registerExtension;
++ (void)registerExtension:(BOOL) shouldWait;
+
 - (NSString*)name;
 - (void)unregister;
 - (void)onUnregister;
@@ -47,7 +52,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)openURL:(NSURL *)url options:(NSDictionary *)options;
 
 - (NSDictionary*)getConversionData;
-
+- (void) AFLoggr:(NSString*)msg;
 @end
 NS_ASSUME_NONNULL_END
 

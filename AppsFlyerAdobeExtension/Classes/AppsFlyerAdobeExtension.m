@@ -26,11 +26,18 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
         dispatch_once(&once, ^{
             __sharedInstance = self;
         });
+        id waitForECIDFlag = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"AppsFlyerWaitForExperienceCloudId"];
+        if(waitForECIDFlag){
+            _waitForECID = YES;
+        }else{
+            _waitForECID = NO;
+        }
         
         _didReceiveConfigurations = NO;
         _didInit = NO;
         _trackAttributionData = NO;
         _eventSettings = @"action";
+        _mayStartSDK = NO;
         
         NSError* error = nil;
         
@@ -39,7 +46,7 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
                              eventType:@"com.adobe.eventType.hub"
                            eventSource:@"com.adobe.eventSource.sharedState"
                                  error:&error]) {
-            NSLog(@"com.appsflyer.adobeextension Shared State listener was registered");
+            [self AFLoggr:@"Shared State listener was registered"];
         }
         else if (error) {
             NSLog(@"com.appsflyer.adobeextension Error while registering shared state listener!!\n%@ %ld", [error domain], [error code]);
@@ -73,6 +80,7 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
     }
 }
 
+
 + (void)registerExtension {
     NSError* error = nil;
     if ([ACPCore registerExtension: [AppsFlyerAdobeExtension class] error: &error]) {
@@ -83,6 +91,17 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
     }
 }
 
++ (void)registerExtension: (BOOL) shouldWait {
+    NSError* error = nil;
+    if ([ACPCore registerExtension: [AppsFlyerAdobeExtension class] error: &error]) {
+        NSLog(@"com.appsflyer.adobeextension was registered");
+    }
+    else {
+        NSLog(@"Error registering com.appsflyer.adobeextension: %@ %d", [error domain], (int)[error code]);
+    }
+}
+
+
 - (void)unregister {
     [[self api] unregisterExtension];
 }
@@ -91,36 +110,38 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidBecomeActiveNotification object:nil];
     __sharedInstance = nil;
     
-    NSLog(@"com.appsflyer.adobeextension was unregistered");
+    [self AFLoggr:@"was unregistered"];
 }
 
 - (void)unexpectedError : (nonnull NSError*) error {
-//    [super unexpectedError];
+    //    [super unexpectedError];
     NSLog(@"com.appsflyer.adobeextension unexpectedError %@", error);
 }
 
+
+
 - (void)setupAppsFlyerTrackingWithAppId:(NSString*)appId appsFlyerDevKey:(NSString*)appsFlyerDevKey
                                 isDebug:(BOOL)isDebug trackAttrData:(BOOL)trackAttrData
-                                eventSettings:(nonnull NSString *)eventSettings {
+                          eventSettings:(nonnull NSString *)eventSettings {
     if (appsFlyerDevKey != nil) {
         if (![self didReceiveConfigurations]) {
             
-            [ACPIdentity getExperienceCloudId:^(NSString * _Nullable retrievedCloudId) {
-                if (retrievedCloudId) {
-                    self->_ecid = retrievedCloudId;
-                    [[AppsFlyerLib shared] setCustomerUserID:retrievedCloudId];
-                } else {
-                    NSLog(@"com.appsflyer.adobeextension ExperienceCloudId is null");
-                }
-            }];
+            if ([self waitForECID]) {
+                [self AFLoggr:@"waiting for ECID"];
+                self->_mayStartSDK = NO;
+            }else{
+                [self AFLoggr:@"not waiting for ECID"];
+                self->_mayStartSDK = YES;
+            }
+            
             
             SEL SKSel = NSSelectorFromString(@"__willResolveSKRules:");
-           id AppsFlyer = [AppsFlyerLib shared];
-           if ([AppsFlyer respondsToSelector:SKSel]) {
-               bypassDidFinishLaunchingWithOption msgSend = (bypassDidFinishLaunchingWithOption)objc_msgSend;
-               msgSend(AppsFlyer, SKSel, 2);
-           }
-       
+            id AppsFlyer = [AppsFlyerLib shared];
+            if ([AppsFlyer respondsToSelector:SKSel]) {
+                bypassDidFinishLaunchingWithOption msgSend = (bypassDidFinishLaunchingWithOption)objc_msgSend;
+                msgSend(AppsFlyer, SKSel, 2);
+            }
+            
             if (appId && ![appId isEqualToString: @""]){
                 [AppsFlyerLib shared].appleAppID = appId;
             }
@@ -129,6 +150,21 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
             [AppsFlyerLib shared].delegate = self;
             [AppsFlyerLib shared].isDebug = isDebug;
             
+            [ACPIdentity getExperienceCloudId:^(NSString * _Nullable retrievedCloudId) {
+                if (retrievedCloudId) {
+                    self->_ecid = retrievedCloudId;
+                    [[AppsFlyerLib shared] setCustomerUserID:retrievedCloudId];
+                    [self AFLoggr:[NSString stringWithFormat:@"%@ %@", @"ExperienceCloudId is" ,retrievedCloudId]];
+                    
+                } else {
+                    [self AFLoggr:@"ExperienceCloudId is null"];
+                }
+                if(self->_waitForECID){
+                    self->_mayStartSDK = YES;
+                    [self appDidBecomeActive];
+                }
+            }];
+            
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
             
             [self setTrackAttributionData:trackAttrData];
@@ -136,7 +172,7 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
             [self setDidReceiveConfigurations:YES];
             
             if (![self didInit]) {
-                [[AppsFlyerLib shared] start];
+                [self appDidBecomeActive];
                 [AppsFlyerAttribution shared].isBridgeReady = YES;
                 [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
                 [self setDidInit:YES];
@@ -148,7 +184,9 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
 }
 
 - (void) appDidBecomeActive {
-    if ([self didReceiveConfigurations]) {
+    [self AFLoggr: @"appDidBecomeActive"];
+    if ([self didReceiveConfigurations] && self->_mayStartSDK) {
+        [self AFLoggr: @"AF Start"];
         [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
         [[AppsFlyerLib shared] start];
         [self setDidInit:YES];
@@ -156,7 +194,7 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
 }
 
 + (void)continueUserActivity:(NSUserActivity *)userActivity
-            restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> *restorableObjects))restorationHandler {
+          restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> *restorableObjects))restorationHandler {
     [[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
 }
 
@@ -165,6 +203,7 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
 }
 
 - (void) onAppOpenAttribution:(NSDictionary *)attributionData {
+    [self AFLoggr: @"onAppOpenAttribution"];
     NSDictionary* newAttributionData = [self returnParsedAttribution:attributionData];
     NSMutableDictionary* appendedAttributionData = [NSMutableDictionary dictionaryWithDictionary:attributionData];
     [appendedAttributionData setObject:@"onAppOpenAttribution" forKey:@"callback_type"];
@@ -184,15 +223,16 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
 }
 
 - (void) onAppOpenAttributionFailure:(NSError *)error {
+    [self AFLoggr: @"onAppOpenAttributionFailure"];
     if (__errorHandler) {
         __errorHandler(error);
     }
 }
 
 - (void)onConversionDataSuccess:(nonnull NSDictionary *)installData {
-    
+    [self AFLoggr: @"onConversionDataSuccess"];
     NSMutableDictionary* appendedInstallData = [NSMutableDictionary dictionaryWithDictionary:installData];
-
+    
     
     if (_trackAttributionData) {
         id isFirstData = [installData objectForKey:@"is_first_launch"];
@@ -224,6 +264,7 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
 }
 
 - (void)onConversionDataFail:(nonnull NSError *)error {
+    [self AFLoggr: @"onConversionDataFail"];
     if (__errorHandler) {
         __errorHandler(error);
     }
@@ -275,7 +316,7 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
     
     [sharedEventState removeObjectForKey:CALLBACK_TYPE];
     [sharedEventState removeObjectForKey:IS_FIRST_LAUNCH];
-
+    
     return sharedEventState;
 }
 
@@ -313,6 +354,11 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
 
 - (NSDictionary*)getConversionData {
     return _gcd;
+}
+
+
+- (void) AFLoggr:(NSString*)msg{
+    NSLog(@"com.appsflyer.adobeextension %@" , msg);
 }
 
 @end
