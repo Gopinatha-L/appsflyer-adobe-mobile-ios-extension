@@ -20,7 +20,6 @@
 #define IS_FIRST_LAUNCH  @"is_first_launch"
 #define CALLBACK_TYPE    @"callback_type"
 
-static BOOL absd;
 NS_ASSUME_NONNULL_BEGIN
 @interface AppsFlyerAdobeExtension : ACPExtension <AppsFlyerLibDelegate> {}
 
@@ -30,19 +29,18 @@ NS_ASSUME_NONNULL_BEGIN
 @property (atomic) NSString* eventSettings;
 @property (atomic) NSString* ecid;
 @property (atomic) NSDictionary* gcd;
-@property(atomic) BOOL waitForECID;
 @property (atomic) BOOL mayStartSDK;
+
 
 + (nullable instancetype)shared;
 + (void)registerExtension;
-+ (void)registerExtension:(BOOL) shouldWait;
 
 - (NSString*)name;
 - (void)unregister;
 - (void)onUnregister;
 - (void)unexpectedError: (NSError*) error;
 
-- (void)setupAppsFlyerTrackingWithAppId:(NSString*)appId appsFlyerDevKey:(NSString*)appsFlyerDevKey isDebug:(BOOL)isDebug trackAttrData:(BOOL)trackAttrData eventSettings:(NSString*)eventSettings;
+- (void)setupAppsFlyerTrackingWithAppId:(NSString*)appId appsFlyerDevKey:(NSString*)appsFlyerDevKey isDebug:(BOOL)isDebug trackAttrData:(BOOL)trackAttrData eventSettings:(NSString*)eventSettings waitForECID:(BOOL)waitForECID;
 + (void)registerCallbacks:(void (^ _Nullable)(NSDictionary *dictionary))completionHandler;
 + (void)callbacksErrorHandler:(void (^ _Nullable)(NSError *error))errorHandler;
 - (NSMutableDictionary*)setKeyPrefix:(NSDictionary *)attributionData;

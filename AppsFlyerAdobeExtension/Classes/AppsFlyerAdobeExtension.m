@@ -26,18 +26,13 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
         dispatch_once(&once, ^{
             __sharedInstance = self;
         });
-        id waitForECIDFlag = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"AppsFlyerWaitForExperienceCloudId"];
-        if(waitForECIDFlag){
-            _waitForECID = YES;
-        }else{
-            _waitForECID = NO;
-        }
         
         _didReceiveConfigurations = NO;
         _didInit = NO;
         _trackAttributionData = NO;
         _eventSettings = @"action";
         _mayStartSDK = NO;
+        
         
         NSError* error = nil;
         
@@ -91,16 +86,6 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
     }
 }
 
-+ (void)registerExtension: (BOOL) shouldWait {
-    NSError* error = nil;
-    if ([ACPCore registerExtension: [AppsFlyerAdobeExtension class] error: &error]) {
-        NSLog(@"com.appsflyer.adobeextension was registered");
-    }
-    else {
-        NSLog(@"Error registering com.appsflyer.adobeextension: %@ %d", [error domain], (int)[error code]);
-    }
-}
-
 
 - (void)unregister {
     [[self api] unregisterExtension];
@@ -122,11 +107,12 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
 
 - (void)setupAppsFlyerTrackingWithAppId:(NSString*)appId appsFlyerDevKey:(NSString*)appsFlyerDevKey
                                 isDebug:(BOOL)isDebug trackAttrData:(BOOL)trackAttrData
-                          eventSettings:(nonnull NSString *)eventSettings {
+                          eventSettings:(nonnull NSString *)eventSettings
+                            waitForECID:(BOOL)waitForECID{
     if (appsFlyerDevKey != nil) {
         if (![self didReceiveConfigurations]) {
             
-            if ([self waitForECID]) {
+            if (waitForECID) {
                 [self AFLoggr:@"waiting for ECID"];
                 self->_mayStartSDK = NO;
             }else{
@@ -159,7 +145,7 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
                 } else {
                     [self AFLoggr:@"ExperienceCloudId is null"];
                 }
-                if(self->_waitForECID){
+                if(waitForECID){
                     self->_mayStartSDK = YES;
                     [self appDidBecomeActive];
                 }
@@ -268,6 +254,8 @@ typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
     if (__errorHandler) {
         __errorHandler(error);
     }
+    
+    
 }
 
 + (void)registerCallbacks:(void (^)(NSDictionary *dictionary))completionHandler {
