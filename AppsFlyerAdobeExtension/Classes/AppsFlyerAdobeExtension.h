@@ -29,15 +29,18 @@ NS_ASSUME_NONNULL_BEGIN
 @property (atomic) NSString* eventSettings;
 @property (atomic) NSString* ecid;
 @property (atomic) NSDictionary* gcd;
+@property (atomic) BOOL mayStartSDK;
+
 
 + (nullable instancetype)shared;
 + (void)registerExtension;
+
 - (NSString*)name;
 - (void)unregister;
 - (void)onUnregister;
 - (void)unexpectedError: (NSError*) error;
 
-- (void)setupAppsFlyerTrackingWithAppId:(NSString*)appId appsFlyerDevKey:(NSString*)appsFlyerDevKey isDebug:(BOOL)isDebug trackAttrData:(BOOL)trackAttrData eventSettings:(NSString*)eventSettings;
+- (void)setupAppsFlyerTrackingWithAppId:(NSString*)appId appsFlyerDevKey:(NSString*)appsFlyerDevKey isDebug:(BOOL)isDebug trackAttrData:(BOOL)trackAttrData eventSettings:(NSString*)eventSettings waitForECID:(BOOL)waitForECID;
 + (void)registerCallbacks:(void (^ _Nullable)(NSDictionary *dictionary))completionHandler;
 + (void)callbacksErrorHandler:(void (^ _Nullable)(NSError *error))errorHandler;
 - (NSMutableDictionary*)setKeyPrefix:(NSDictionary *)attributionData;
@@ -47,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)openURL:(NSURL *)url options:(NSDictionary *)options;
 
 - (NSDictionary*)getConversionData;
-
+- (void) AFLoggr:(NSString*)msg;
 @end
 NS_ASSUME_NONNULL_END
 

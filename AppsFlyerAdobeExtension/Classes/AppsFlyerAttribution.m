@@ -26,8 +26,8 @@
                                                  selector:@selector(receiveBridgeReadyNotification:)
                                                      name:AF_BRIDGE_SET
                                                    object:nil];
-  }
-  return self;
+    }
+    return self;
 }
 
 - (void) continueUserActivity: (NSUserActivity*_Nullable) userActivity restorationHandler: (void (^_Nullable)(NSArray * _Nullable))restorationHandler{
@@ -56,7 +56,7 @@
         [AppsFlyerAttribution shared].sourceApplication = sourceApplication;
         [AppsFlyerAttribution shared].annotation = annotation;
     }
-
+    
 }
 
 - (void) receiveBridgeReadyNotification:(NSNotification *) notification

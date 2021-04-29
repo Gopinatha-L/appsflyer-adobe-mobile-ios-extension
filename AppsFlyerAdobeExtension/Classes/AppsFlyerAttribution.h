@@ -19,4 +19,4 @@
 
 @end
 
-static NSString * _Nonnull const AF_BRIDGE_SET                  = @"bridge is set";
+static NSString * _Nonnull const AF_BRIDGE_SET = @"bridge is set";

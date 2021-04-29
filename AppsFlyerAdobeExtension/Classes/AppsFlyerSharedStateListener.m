@@ -14,7 +14,7 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-
+        
         NSLog(@"com.appsflyer.adobeextension Shared State listener was initialized");
     }
     return self;
@@ -23,7 +23,7 @@
 - (void)hear:(nonnull ACPExtensionEvent*)event {
     
     NSDictionary* jsonEventData = [event eventData];
-
+    
     if (!jsonEventData) {
         NSLog(@"com.appsflyer.adobeextension Retrieved event data is nil");
     }
@@ -43,15 +43,19 @@
                 NSString* eventSettings = [configSharedState objectForKey:@"inAppEventSetting"];
                 id appsFlyerIsDebug = [configSharedState objectForKey:@"appsFlyerIsDebug"];
                 id appsFlyerTrackAttrData = [configSharedState objectForKey:@"appsFlyerTrackAttrData"];
+                id appsFlyerWaitForECID = [configSharedState objectForKey:@"appsFlyerWaitForECID"];
                 
                 BOOL isDebug = [appsFlyerIsDebug isKindOfClass:[NSNumber class]] && [appsFlyerIsDebug integerValue] == 1;
                 BOOL trackAttrData = [appsFlyerTrackAttrData isKindOfClass:[NSNumber class]] && [appsFlyerTrackAttrData integerValue] == 1;
+                BOOL waitForECID = [appsFlyerWaitForECID isKindOfClass:[NSNumber class]] && [appsFlyerWaitForECID integerValue] == 1;
+                
                 
                 [[AppsFlyerAdobeExtension shared] setupAppsFlyerTrackingWithAppId:appsFlyerAppId
                                                                   appsFlyerDevKey:appsFlyerDevKey
                                                                           isDebug:isDebug
                                                                     trackAttrData:trackAttrData
-                                                                    eventSettings:eventSettings];
+                                                                    eventSettings:eventSettings
+                                                                      waitForECID:waitForECID];
                 
                 NSLog(@"com.appsflyer.adobeextension Received credentials for app: %@", [configSharedState objectForKey:@"appsFlyerAppId"]);
             } else {
