@@ -21,14 +21,14 @@
 
 ### <a id="plugin-build-for"> This plugin is built for
     
-- iOS AppsFlyer SDK **v6.2.6**
+- iOS AppsFlyer SDK **v6.3.1**
 
 ## <a id="add-sdk-to-project"> 📲 Adding the SDK to your project
 
 Add the following to your app's `Podfile`:
 
 ```javascript
-	pod 'AppsFlyerAdobeExtension', '6.2.6'
+	pod 'AppsFlyerAdobeExtension', '6.3.1'
 ```
 
 ## <a id="init-sdk"> 🚀 Initializing the SDK
