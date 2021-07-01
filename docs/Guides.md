@@ -13,6 +13,7 @@
 - [Data Elements](#data-elements)
 - [Attribution Data tracking with Adobe Analytics](#attr-data)
 - [Deeplink Data tracking with Adobe Analytics](#deeplink-data)
+- [Wait for ECID](#wait-for-ecid)
 
 ##  <a id="deeplinking"> Deep Linking
     
@@ -267,3 +268,11 @@ For example here is a sample "AppsFlyer Engagement Data" event:
         }
     }
 ```
+
+##  <a id="wait-for-ecid"> Wait for ECID
+
+By default the AppsFlyer SDK sets the ExperienceCloudId (ECID) as the CustomerUserID. <br/>
+Setting the `Wait for ECID` setting to true, will guarantee that the ECID will be set on the `first launch`. <br/>
+Use this setting if you must have ECID attached to the install.<br/>
+
+If this setting is set to false, ECID will be set as soon as is available.
