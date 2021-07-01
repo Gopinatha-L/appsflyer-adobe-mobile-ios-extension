@@ -275,4 +275,4 @@ By default the AppsFlyer SDK sets the ExperienceCloudId (ECID) as the CustomerUs
 Setting the `Wait for ECID` setting to true, will guarantee that the ECID will be set on the `first launch`. <br/>
 Use this setting if you must have ECID attached to the install.<br/>
 
-If this setting is set to false, ECID will be set as soon as is available.
+If this setting is set to false, ECID will be set as soon as it is available.
