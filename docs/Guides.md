@@ -14,6 +14,7 @@
 - [Attribution Data tracking with Adobe Analytics](#attr-data)
 - [Deeplink Data tracking with Adobe Analytics](#deeplink-data)
 - [Wait for ECID](#wait-for-ecid)
+- [Install Test](#install-test)
 
 ##  <a id="deeplinking"> Deep Linking
     
@@ -276,3 +277,25 @@ Setting the `Wait for ECID` setting to true, will guarantee that the ECID will b
 Use this setting if you must have ECID attached to the install.<br/>
 
 If this setting is set to false, ECID will be set as soon as it is available.
+
+##  <a id="install-test"> Install Test
+
+1. Uninstall the app from the device.
+2. Find your deviceID. 
+3. [Register](https://support.appsflyer.com/hc/en-us/articles/207031996-Registering-test-devices-) your device as a test device
+4. Generate a tracking link: (3 options)
+    1. Create a link via the AppsFlyer dashboard
+    2. Use the [SDK integration test](https://support.appsflyer.com/hc/en-us/articles/360001559405-Test-mobile-SDK-integration-with-the-app#test-from-dashboard)
+    3. Create a [custom link](https://support.appsflyer.com/hc/en-us/articles/207447163-Attribution-link-structure-and-parameters) 
+
+
+    ```
+    https://app.appsflyer.com/<your-app-id>?pid=af_test&idfa=<your_idfa>
+
+    Example:
+    https://app.appsflyer.com/id4163879027?pid=af_test&idfa=1f******-****-****-********745e
+
+    ```
+5. Click the link on the device 
+6. Install & Launch the app
+7. Check the AppsFlyer Dashboard for the install
