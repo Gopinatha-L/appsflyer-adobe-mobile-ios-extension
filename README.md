@@ -28,7 +28,7 @@
 Add the following to your app's `Podfile`:
 
 ```javascript
-	pod 'AppsFlyerAdobeExtension', '6.3.1'
+	pod 'AppsFlyerAdobeExtension', '6.4.4'
 ```
 
 ## <a id="init-sdk"> 🚀 Initializing the SDK
