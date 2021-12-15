@@ -21,7 +21,7 @@
 
 ### <a id="plugin-build-for"> This plugin is built for
     
-- iOS AppsFlyer SDK **v6.3.1**
+- iOS AppsFlyer SDK **v6.4.4**
 
 ## <a id="add-sdk-to-project"> 📲 Adding the SDK to your project
 
