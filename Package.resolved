@@ -1,0 +1,34 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "AEPCore",
+        "repositoryURL": "https://github.com/adobe/aepsdk-core-ios.git",
+        "state": {
+          "branch": null,
+          "revision": "093c929fbd844284c100d2dff20f3385334af212",
+          "version": "3.4.2"
+        }
+      },
+      {
+        "package": "AEPRulesEngine",
+        "repositoryURL": "https://github.com/adobe/aepsdk-rulesengine-ios.git",
+        "state": {
+          "branch": null,
+          "revision": "8795703e92570d9744d7f39d59e2c6f44ecb3078",
+          "version": "1.1.0"
+        }
+      },
+      {
+        "package": "AppsFlyerLib",
+        "repositoryURL": "https://github.com/AppsFlyerSDK/AppsFlyerFramework",
+        "state": {
+          "branch": null,
+          "revision": "dde1f5b04105fa9a27b3ac78b2af88d4164755dc",
+          "version": "6.4.4"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
